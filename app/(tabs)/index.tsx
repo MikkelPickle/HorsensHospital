@@ -1,70 +1,79 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, View, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import MapView, { Marker, Circle, Polygon, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
+import ZoomButton from '@/components/ZoomButton'; // Adjust the path as necessary
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useLocationTracking } from '@/hooks/useLocationTracking';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function MapScreen() {
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  
+  // Default region, this will be the center of the map initially
+  const defaultRegion = {
+    latitude: 55.86385746324295, // Default latitude 
+    longitude: 9.873457239221938, // Default longitude
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.007,
+  };
 
-export default function HomeScreen() {
+  // Keep track of whether the map should be centered on the user location
+  const [isCenterOnUser, setIsCenterOnUser] = useState(false);
+
+  const [region, setRegion] = useState(defaultRegion);
+  
+  useLocationTracking(setLocation, isCenterOnUser); 
+
+  const zoomToDefault = () => {
+    setRegion(defaultRegion);
+    setIsCenterOnUser(false); // Disable automatic centering
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        region={region} // The map will center on this region
+        onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+      >
+        {location && (
+          <Marker
+            coordinate={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            }}
+            title="Du er her!"
+          />
+        )}
+
+        <Polygon
+          coordinates={[
+            { latitude: 55.86125746324295, longitude: 9.876357239221938 }, // top-left
+            { latitude: 55.86505746324295, longitude: 9.876357239221938 }, // top-right
+            { latitude: 55.86505746324295, longitude: 9.870457239221938 }, // bottom-right
+            { latitude: 55.86125746324295, longitude: 9.870457239221938 }, // bottom-left
+          ]}
+          strokeColor="rgba(0,255,0,1)" // outline color
+          fillColor="rgba(0,255,0,1)" // fill color (green with 50% opacity)
+          strokeWidth={2}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        {/* Marker with Ionicon */}
+        <Marker coordinate={{ latitude: 55.86334846324295, longitude: 9.872087239221938 }}>
+          <Ionicons name="fast-food-outline" size={30} color="black" />
+        </Marker>
+
+      </MapView>
+      <ZoomButton onPress={zoomToDefault} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  map: {
+    flex: 1,
   },
 });
