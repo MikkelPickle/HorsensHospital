@@ -1,10 +1,11 @@
 import { Image, StyleSheet, Platform, View, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import MapView, { Marker, Circle, Polygon, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Circle, Polygon } from 'react-native-maps';
 import * as Location from 'expo-location';
 import ZoomButton from '@/components/ZoomButton'; // Adjust the path as necessary
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocationTracking } from '@/hooks/useLocationTracking';
+import { FaPlane } from "react-icons/fa6";
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -53,14 +54,21 @@ export default function MapScreen() {
             { latitude: 55.86505746324295, longitude: 9.870457239221938 }, // bottom-right
             { latitude: 55.86125746324295, longitude: 9.870457239221938 }, // bottom-left
           ]}
-          strokeColor="rgba(0,255,0,1)" // outline color
-          fillColor="rgba(0,255,0,1)" // fill color (green with 50% opacity)
-          strokeWidth={2}
+          strokeColor="rgba(0,0,0,1)" // outline color
+          fillColor="rgba(0,255,0,0)" // fill color (green with 50% opacity)
+          strokeWidth={5}
         />
 
-        {/* Marker with Ionicon */}
         <Marker coordinate={{ latitude: 55.86334846324295, longitude: 9.872087239221938 }}>
-          <Ionicons name="fast-food-outline" size={30} color="black" />
+          <Ionicons name="fast-food-outline" size={35} color="black" />
+        </Marker>
+
+        <Marker coordinate={{ latitude: 55.863788, longitude: 9.872603 }}>
+          <Ionicons name="enter-outline" size={35} color="black" />
+        </Marker>
+
+        <Marker coordinate={{ latitude: 55.86399301386834, longitude: 9.871609634919366 }}>
+        <Ionicons name="alert-outline" size={35} color="black" />
         </Marker>
 
       </MapView>

@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mikkelpickle.HorsensHospital",
+      "config": {
+        "googleMapsApiKey": "AIzaSyBQJ82qCT7wN9pmBTYZm5_dyqfyjHxtUmAY"
+      }
     },
     "android": {
       "adaptiveIcon": {
