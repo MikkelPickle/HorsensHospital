@@ -7,6 +7,9 @@ import * as Location from 'expo-location';
 import { useLocationTracking } from '@/hooks/useLocationTracking';
 import { useRouter } from 'expo-router';
 import { SearchBar } from '@rneui/base';
+import markers from '@/constants/Markers';
+import styles from '@/constants/Styles';  // Import the styles
+type MarkerKey = 'food' | 'entrance' | 'intensive';
 
 export default function MapScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -22,6 +25,7 @@ export default function MapScreen() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [keyboardVisible, setKeyboardVisible] = useState<boolean>(false);
   const router = useRouter();
+  const [displayedMarker, setDisplayedMarker] = useState<MarkerKey | null>(null);
 
   useLocationTracking(setLocation, isCenterOnUser);
 
@@ -37,10 +41,12 @@ export default function MapScreen() {
     });
   };
 
-  const allSuggestions = ['Apple', 'Banana', 'Orange', 'Pineapple', 'Strawberry'];
+  const allSuggestions = ['intensive', 'entrance', 'food'];
 
   const updateSearch = (query: string) => {
     setSearch(query);
+  
+    // Filter suggestions based on the search query
     const filteredSuggestions = allSuggestions.filter(item =>
       item.toLowerCase().includes(query.toLowerCase())
     );
@@ -50,6 +56,20 @@ export default function MapScreen() {
   const handleSuggestionPress = (item: string) => {
     setSearch(item); // Set the search input to the selected item
     setSuggestions([]); // Clear suggestions after selection
+  
+    // Find the marker that matches the selected suggestion
+    const matchedMarker = Object.keys(markers).find((key) =>
+      key.toLowerCase() === item.toLowerCase()
+    ) as MarkerKey | undefined;
+  
+    if (matchedMarker) {
+      const marker = markers[matchedMarker];
+      // Update the map region to focus on the selected marker
+      setRegion(defaultRegion);
+      setDisplayedMarker(matchedMarker); // Update to display the selected marker only
+    } else {
+      setDisplayedMarker(null); // Reset to display all markers
+    }
   };
 
   return (
@@ -61,7 +81,11 @@ export default function MapScreen() {
         placeholder="Type Here..."
         onChangeText={updateSearch}
         value={search}
-        onClear={() => setSuggestions([])}
+        onClear={() => {
+          setSearch('');        // Clear the search text
+          setSuggestions([]);   // Clear the suggestions
+          setDisplayedMarker(null); // Show all markers
+        }}
         onFocus={() => setKeyboardVisible(true)} // Ensure suggestions show when focused
       />
 
@@ -109,26 +133,32 @@ export default function MapScreen() {
           strokeWidth={5}
         />
 
+      {(!displayedMarker || displayedMarker === 'food') && (
         <Marker
-          coordinate={{ latitude: 55.86334846324295, longitude: 9.872087239221938 }}
+          coordinate={markers.food.coordinate}
           onPress={() => handleMarkerPress('food')}
         >
-          <Ionicons name="fast-food-outline" size={35} color="black" />
+          <Ionicons name={markers.food.icon} size={35} color="black" />
         </Marker>
+      )}
 
+      {(!displayedMarker || displayedMarker === 'entrance') && (
         <Marker
-          coordinate={{ latitude: 55.863788, longitude: 9.872603 }}
+          coordinate={markers.entrance.coordinate}
           onPress={() => handleMarkerPress('entrance')}
         >
-          <Ionicons name="enter-outline" size={35} color="black" />
+          <Ionicons name={markers.entrance.icon} size={35} color="white" />
         </Marker>
+      )}
 
+      {(!displayedMarker || displayedMarker === 'intensive') && (
         <Marker
-          coordinate={{ latitude: 55.86399301386834, longitude: 9.871609634919366 }}
+          coordinate={markers.intensive.coordinate}
           onPress={() => handleMarkerPress('intensive')}
         >
-          <Ionicons name="alert-outline" size={35} color="black" />
+          <Ionicons name={markers.intensive.icon} size={35} color="red" />
         </Marker>
+      )}
 
       </MapView>
 
@@ -137,42 +167,4 @@ export default function MapScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  searchBarContainer: {
-    position: 'absolute',
-    top: 70,
-    left: 10,
-    right: 10,
-    zIndex: 1,
-    borderRadius: 20,
-  },
-  searchBarInputContainer: {
-    backgroundColor: 'white',
-    borderRadius: 25,
-  },
-  searchBarInput: {
-    fontSize: 16,
-    color: 'black',
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    top: 130, // Adjust this value based on the SearchBar's position
-    left: 10,
-    right: 10,
-    backgroundColor: 'white',
-    borderRadius: 5,
-    elevation: 5, // Optional: Adds shadow effect on Android
-    zIndex: 1,
-  },
-  suggestionItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-});
+
